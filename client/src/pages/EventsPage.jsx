@@ -6,14 +6,23 @@ import EventCard from '../components/EventCard';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ErrorMessage from '../components/ErrorMessage';
 import EmptyState from '../components/EmptyState';
+import EventGridSkeleton from '../components/EventGridSkeleton';
 import Footer from '../components/Footer';
 import { useEvents } from '../hooks/useEvents';
+import { useToast } from '../hooks/useToast';
 
 export default function EventsPage() {
   const { events, loading, error, search, setSearch, category, setCategory, fetchEvents } = useEvents();
+  const { addToast } = useToast();
 
-  if (loading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message={error} onRetry={() => fetchEvents(search, category)} />;
+  const handleRetry = () => {
+    addToast('Retrying to load events...', 'info');
+    fetchEvents(search, category);
+  };
+
+  if (error && events.length === 0) {
+    return <ErrorMessage message={error} onRetry={handleRetry} />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -43,14 +52,24 @@ export default function EventsPage() {
 
       {/* Events Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {events.length === 0 ? (
+        {loading && events.length === 0 ? (
+          <EventGridSkeleton />
+        ) : events.length === 0 ? (
           <EmptyState />
         ) : (
           <>
-            <div className="mb-6">
+            <div className="mb-6 flex items-center justify-between">
               <p className="text-gray-700 font-medium">
                 Found <span className="font-bold text-blue-600">{events.length}</span> event{events.length !== 1 ? 's' : ''}
               </p>
+              {search && (
+                <button
+                  onClick={() => setSearch('')}
+                  className="text-sm text-blue-600 hover:underline"
+                >
+                  Clear search
+                </button>
+              )}
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {events.map((event) => (
