@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import ComingSoonModal from './ComingSoonModal';
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -26,9 +27,7 @@ export default function Navbar() {
 
           {/* Create Event CTA */}
           <div className="hidden md:block">
-            <button className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium">
-              Create Event
-            </button>
+            <ComingSoonModal />
           </div>
 
           {/* Mobile Menu Button */}
@@ -52,9 +51,9 @@ export default function Navbar() {
             <Link to="/" className="block py-2 text-gray-700 hover:text-blue-600">Events</Link>
             <a href="#about" className="block py-2 text-gray-700 hover:text-blue-600">About</a>
             <a href="#contact" className="block py-2 text-gray-700 hover:text-blue-600">Contact</a>
-            <button className="w-full mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
-              Create Event
-            </button>
+            <div className="mt-4">
+              <ComingSoonModal />
+            </div>
           </div>
         )}
       </div>
