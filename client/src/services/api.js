@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_URL,
@@ -8,6 +8,21 @@ const api = axios.create({
     'Content-Type': 'application/json'
   }
 });
+
+// Add request interceptor for better error handling
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      console.error('Unauthorized - Please log in');
+    } else if (error.response?.status === 404) {
+      console.error('Resource not found');
+    } else if (error.response?.status === 500) {
+      console.error('Server error - Please try again later');
+    }
+    return Promise.reject(error);
+  }
+);
 
 // Event endpoints
 export const eventService = {

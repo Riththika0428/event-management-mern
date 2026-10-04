@@ -10,26 +10,48 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+const CORS_ORIGIN = process.env.CORS_ORIGIN || 'http://localhost:5173';
 
 // Connect to MongoDB
 connectDB();
 
+// CORS configuration
+const corsOptions = {
+  origin: CORS_ORIGIN.split(',').map(url => url.trim()),
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Request logging middleware
+// Security headers
 app.use((req, res, next) => {
-  console.log(`📨 ${req.method} ${req.path}`);
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
   next();
 });
+
+// Request logging middleware
+if (NODE_ENV === 'development') {
+  app.use((req, res, next) => {
+    console.log(`📨 ${req.method} ${req.path}`);
+    next();
+  });
+}
 
 // Test route
 app.get('/', (req, res) => {
   res.json({
     success: true,
-    message: 'Event Management API is running! 🚀'
+    message: 'Event Management API is running! 🚀',
+    environment: NODE_ENV
   });
 });
 
@@ -38,7 +60,8 @@ app.get('/api/health', (req, res) => {
   res.json({
     success: true,
     message: 'Server is healthy',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    environment: NODE_ENV
   });
 });
 
@@ -63,7 +86,8 @@ app.listen(PORT, () => {
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   🚀 Event Management Server
   Running on: http://localhost:${PORT}
-  Environment: ${process.env.NODE_ENV}
+  Environment: ${NODE_ENV}
+  CORS Origin: ${CORS_ORIGIN}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
   `);
 });
