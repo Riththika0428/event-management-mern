@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "buildCommand": "npm install",
+  "devCommand": "node server.js",
+  "env": {
+    "MONGODB_URI": "@mongodb_uri",
+    "NODE_ENV": "production",
+    "CORS_ORIGIN": "@cors_origin"
+  },
+  "functions": {
+    "api/index.js": {
+      "memory": 1024,
+      "maxDuration": 30
+    }
+  },
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "api/index.js"
+    }
+  ]
+}
