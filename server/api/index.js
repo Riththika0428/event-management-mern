@@ -12,9 +12,6 @@ const app = express();
 const NODE_ENV = process.env.NODE_ENV || 'production';
 const CORS_ORIGIN = process.env.CORS_ORIGIN || '';
 
-// Connect to MongoDB
-connectDB();
-
 // Build allowed origins list
 const allowedOrigins = CORS_ORIGIN
   ? CORS_ORIGIN.split(',').map(url => url.trim().replace(/\/$/, ''))
@@ -46,6 +43,16 @@ app.use(cors(corsOptions));
 app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Ensure DB is connected before every request (safe for serverless)
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    res.status(503).json({ success: false, message: 'Database unavailable. Please try again.' });
+  }
+});
 
 // Security headers
 app.use((req, res, next) => {
